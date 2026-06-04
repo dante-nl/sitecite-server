@@ -19,6 +19,13 @@ const fontList = [
         file_regular: "merriweather.ttf",
         file_italic: "merriweather_italic.ttf",
         type: "serif"
+    },
+    {
+        name: "Impact",
+        credit: "Designed by Geoffrey Lee. Download from deefont.com. Suggestion by @andrewpeacock.",
+        file_regular: "impact.ttf",
+        file_italic: "impact.ttf",
+        type: "sans-serif"
     }
 ]
 
