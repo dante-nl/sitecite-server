@@ -2,8 +2,9 @@ const express = require('express');
 const exec_mysql = require('../gen_functions/exec_mysql');
 const crypto = require("crypto")
 const pool = require('../server');
-const fs = require('fs').promises;
 const path = require('path');
+const fs = require('fs');
+const yaml = require('yaml');
 require('dotenv').config()
 
 async function redirectUser(req, res) {
@@ -22,10 +23,11 @@ async function redirectUser(req, res) {
     const code = req.params.code
 
     if (code.length < 5 || code.length > 8) {
-        res.status(400).json({
-            success: false,
-            message: "Invalid code."
-        })
+        const filePath = path.join(process.cwd(), '/public/404.html');
+        let content = await fs.readFileSync(filePath, 'utf8');
+        res.setHeader('Content-Type', 'text/html');
+        res.status(404).send(content);
+
         return
     }
 
@@ -34,22 +36,26 @@ async function redirectUser(req, res) {
     `, [code], pool)
 
     if(!linkReq.length) {
-        res.status(400).json({
-            success: false,
-            message: "Invalid code."
-        })
+        const filePath = path.join(process.cwd(), '/public/404.html');
+        let content = await fs.readFileSync(filePath, 'utf8');
+        res.setHeader('Content-Type', 'text/html');
+        res.status(404).send(content);
+
         return
     }
 
     const url = linkReq[0].link
         
     const filePath = path.join(process.cwd(), '/link/link.html');
-    let content = await fs.readFile(filePath, 'utf8');
+    let content = await fs.readFileSync(filePath, "utf8");
     
     const host = new URL(url).hostname
+
+    const yamlConfig = await fs.readFileSync("./config.yaml", 'utf8')
+    const siteciteHost = yaml.parse(yamlConfig).host
     
     content = content.replace(/\{code\}/g, code);
-    content = content.replace(/\{baseUrl\}/g, process.env.HOST);
+    content = content.replace(/\{baseUrl\}/g, siteciteHost);
     content = content.replace(/\{url\}/g, url);
     content = content.replace(/\{host\}/g, host);
     content = content.replace(/\{text\}/g, linkReq[0].text);
